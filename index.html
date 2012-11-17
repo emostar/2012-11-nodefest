@@ -1,0 +1,263 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Bootstrapping in the Cloud with Node</title><link rel="stylesheet" href="assets/css/reveal.css"><link id="theme" rel="stylesheet" href="assets/css/theme/default.css"><!-- For syntax highlighting--><link rel="stylesheet" href="assets/lib/css/zenburn.css"><style type="text/css">img.my-image {
+  margin: 0px !important;
+  vertical-align: bottom !important;
+}
+</style></head><body><div class="reveal"><div class="slides"><section><h1>bootstrapping</h1><h1>with node</h1><div><br></div><p><img height="250" src="assets/img/emostar.jpg"></p><p>@emostar</p></section><section><h2>introduction</h2><div><br></div><ul><li>名前: Jon Keating</li><li>Twitter: @emostar</li><li>現職: <img height="64" src="assets/img/gklst.png" style="vertical-align:middle">Geeklist - Sr. Software Engineer</li><li>USのベンチャー → 英会話 → 出版会社 → IT企業</li><li>C++, PHP, Python, Ruby, Node.js, Java</li></ul></section><section><h2>warning</h2><div><br></div><div><ul><li>最近日本語使ってない</li><li>発音が英語風になってしまう</li><li>わからなかったら。。。m(_ _)m</li></ul></div></section><section><h2>目的</h2><div><br></div><div>１万円とNode.jsだけで新しい収入源を作る</div><div><br></div><img src="assets/img/money.jpg" height="256" style="vertical-align:middle"><span style="size:96px;font-weight:700">+</span><img src="assets/img/nodejs.png" height="256" style="vertical-align:middle"></section><section><h1>bootstrapping</h1><div><br></div><div><ul><li class="fragment">予算：<b>１万円</b></li><li class="fragment">第一目標：<b>サービス開始</b></li><li class="fragment">第二目標：<b>黒字</b></li></ul></div></section><section><h2>目標を実現するため</h2><div><br></div><div class="fragment"><h3>自分で作る</h3></div><div><br></div><div><ul><li style="color:#33cc00" class="fragment">得意じゃないところを練習</li><li style="color:#ff0000" class="fragment">必要なことが後回しにされる</li></ul></div></section><section><h2>目標を実現するため</h2><div><br></div><h3>時間の限り</h3><div><br></div><div><ul><li>夜・週末しかない</li><li>収入がない状態で続けない</li><li>心理的な問題も</li></ul></div></section><section><h2>Nodeで解決できる理由</h2><div><br></div><div><ul><li class="fragment">軽い</li><li class="fragment">単純なコード書ける</li><li class="fragment">モジュールとコミュニティ</li></ul></div></section><section><h1>Cloud</h1><div class="fragment"><h2>Hosting</h2><img src="assets/img/aws.png" height="128"><img src="assets/img/heroku.png" height="128"><div><span class="fragment">セットアップ... </span><span style="color:#B57EDC" class="fragment">Heroku +1</span></div><div><span class="fragment">アップタイム... </span><span style="color:gold" class="fragment">AWS +1</span></div><div><span class="fragment">リリース手順... </span><span style="color:#B57EDC" class="fragment">Heroku +1</span></div><div><span class="fragment">コスト... </span><span class="fragment"><span style="color:#B57EDC">Heroku +1</span> / <span style="color:gold">AWS +.5</span></span></div><div><span class="fragment">スケーラビリティ... </span><span class="fragment">引分？</span></div></div></section><section><h1>Cloud</h1><h2>Services</h2><ul><li class="fragment">Git: <span class="fragment">BitBucket</span></li><li class="fragment">DB: <span class="fragment">MongoHQ</span></li><li class="fragment">Logging: <span class="fragment">PaperTrailApp & Loggly</span></li><li class="fragment">Email: <span class="fragment">SendGrid</span></li><li class="fragment">Analytics: <span class="fragment">Mixpanel</span></li><li class="fragment">Monitoring: <span class="fragment">Pingdom</span></li><li class="fragment">Support: <span class="fragment">Desk.com & Olark</span></li></ul><div class="fragment">+ redis</div></section><section><h2>Cloud</h2><h2>Services</h2><div>割引券！</div><div><br></div><ul><li><a href="http://hackersandfounders.rewardli.com/">Hackers and Founders</a></li><li><a href="http://www.startuppack.org/">Startup Pack</a></li></ul></section><section><h2>Production</h2><div><a href="https://github.com/mathrawka/node-express-starter">https://github.com/mathrawka/node-express-starter</a></div><div class="fragment"><div>package.json</div><pre><code class="json">"dependencies": {
+    "express": "3.0.2",
+    "jade": "0.27.7",
+    "bcrypt": "0.7.3",
+    "mongoose": "3.4.0",
+    "kue": "0.4.2",
+    "winston": "0.6.2",
+    "winston-loggly": "0.6.0",
+    "winston-mail": "0.2.3",
+    "winston-papertrail": "git+https...",
+    "express-request-logger": "0.0.3",
+    "longjohn": "0.0.3",
+    "mixpanel": "0.0.8",
+    "nodemailer": "0.3.31",
+    "underscore": "1.4.2",
+    "async": "0.1.22"
+}</code></pre></div></section><section><h2>Production</h2><div>ログ設定</div><pre><code class="javascript">logger = new (winston.Logger)({
+  transports: [
+    new (winston.transports.Loggly)({
+        subdomain: 'example'
+      , inputToken: 'example'
+      , level: 'info'
+      , json: true
+    }),
+    new (winston.transports.Console)(),
+    new (winston.transports.Papertrail)({
+        host: 'logs.papertrailapp.com'
+      , port: process.env.PAPERTRAIL_PORT
+    })
+  ]
+})</code></pre></section><section><h2>Production</h2><h4>express-request-logger</h4><div>config/routes.js</div><pre><code class="javascript">// Log some extras on each request
+app.all('*', function(req, res, next) {
+  req.kvLog.ip = req.ip
+  next()
+})</code></pre><div>config/middleware/access.js</div><pre><code class="javascript">// Log the user
+req.kvLog.user_id = req.user._id.toString()</code></pre><div>Log output</div><pre><code>TODO1
+TODO2</code></pre></section><section><h2>Production</h2><div>ログをメールで送信する</div><pre><code class="javascript">    new (winston.transports.Mail)({
+        to       : 'user@example.com'
+      , from     : 'winston@example.com'
+      , host     : 'smtp.sendgrid.net'
+      , port     : 587
+      , tls      : true
+      , username : process.env.SENDGRID_USERNAME
+      , password : process.env.SENDGRID_PASSWORD
+      , level    : 'error'
+    }),</code></pre></section><section><h2>Production</h2><h4>エラーハンドラ設定</h4><div>config/errors.js</div><pre><code class="javascript">app.use(function(err, req, res, next) {
+  var logger = req.app.settings.logger
+ 
+  logger.error('An error has been caught',
+               {err: err.stack || err.message})
+ 
+  req.kvLog.error_handler = true
+ 
+  if(req.app.set('ENV') !== 'production') {
+    // Send detailed errors
+    res.send({status: 'error', message: err.stack || err.message})
+  } else {
+    // Hide the error from the user
+    res.send({status: 'error', message: 'INTERNAL_ERROR'})
+  }
+})</code></pre></section><section><h2>Production</h2><h4>例外な状態を通知する</h4><div><br></div><div>データベースのエラー</div><pre><code class="javascript">// エラーハンドラからメール送信する
+db.users.findOne({_id: obj.user_id}, function(err, user) {
+  if (err) return next(err) // DBエラー
+})</code></pre><div>絶対あるはずの情報を取得できない</div><pre><code class="javascript">// 直接エラーメール送信する
+db.users.findOne({_id: obj.user_id}, function(err, user) {
+  if (!user) {
+    logger.error('User disappeared', {id: obj.user_id.toString()})
+    return res.status(404).render('missing-user')
+  }
+})</code></pre></section><section><h2>Production</h2><div>エラー送信をゆるく設定</div><pre><code class="javascript">db.users.findOne({_id: obj.user_id}, function(err, user) {
+  if (!user) {
+    logger.error('User disappeared', {id: obj.user_id.toString()})
+    return res.status(404).render('missing-user')
+  }
+})</code></pre><div>問題ないようだったら、メール送信しないように</div><pre><code class="javascript">db.users.findOne({_id: obj.user_id}, function(err, user) {
+  if (!user) {
+    logger.warn('User disappeared', {id: obj.user_id.toString()})
+    return res.status(404).render('missing-user')
+  }
+})</code></pre></section><section><h2>Testing</h2><div><br></div><div>package.json</div><pre><code class="json">"devDependencies": {
+  "mocha": "1.7.0",
+  "should": "1.2.1",
+  "sinon": "1.5.0",
+  "pow-mongodb-fixtures": "0.8.1",
+  "supertest": "git+https://...",
+},</code></pre></section><section><h2>Testing</h2><div>test/fixtures.js (1/2)</div><pre><code class="java">var id = require('pow-mongodb-fixtures').createObjectId
+ 
+var users = exports.users = {
+  test: {
+      _id: id()
+    , email: 'test@example.com'
+    , password: '$2a$04$5vRQvjaH30SK1C//v1youemnCf0mb47GQ74Bb53qFHHDbj.miu0xm'
+    , name: 'John Doe'
+    , created_at: new Date()
+  }</code></pre></section><section><h2>Testing</h2><div>test/fixtures.js (1/2)</div><pre><code class="java">var todos = exports.todos = {
+  done_todo: {
+      _id: id()
+    , user_id: users.test._id
+    , text: 'Do something fun'
+    , done: true
+  }
+}</code></pre></section><section><h2>Testing</h2><div>test/controller/user.test.js</div><pre><code class="javascript">var testData = require('../fixtures')
+  , fixtures = require('pow-mongodb-fixtures').connect('app-testing')
+ 
+describe('User controller', function() {
+  beforeEach(function(done) {
+    fixtures.clearAllAndLoad('../fixtures.js', done)
+  })
+ 
+  // testDataは普通に使えます
+  db.users.findById(testData.users.test._id, ....)
+})</code></pre></section><section><h2>Testing</h2><div>tests/common.js (1/2)</div><pre><code class="javascript">process.env.NODE_ENV    = 'test'
+process.env.MONGOHQ_URL = 'mongodb://localhost/app-test'
+ 
+var sinon  = require('sinon')
+  , fs     = require('fs')
+  , kue    = require('kue')
+  , twilio = require('../lib/twilio')
+ 
+global.queueCreateStub = sinon.spy(kue.prototype, 'create')
+global.jobSaveStub     = sinon.stub(kue.Job.prototype, 'save')
+global.jobDelaySpy     = sinon.spy(kue.Job.prototype, 'delay')</code></pre></section><section><h2>Testing</h2><div>tests/common.js (2/2)</div><pre><code class="javascript">global.makeCallStub = sinon.stub(twilio.prototype, 'makeCall',
+  function(from, to, appSid, cb) {
+    var filename = __dirname + '/apiResponses/twilio.makeCall.txt'
+    var resp = fs.readFileSync(filename).toString()
+    cb(null, {statusCode:200}, resp)
+  }
+)
+ 
+global.app = require('../config/app')()
+ 
+global.request = require('supertest')</code></pre></section><section><h2>Testing</h2><div>tests/controller/call.test.js (1/2)</div><pre><code class="javascript">request(app)
+  .post('/call/initiate')
+  .send(postData)
+  .expect('Content-Type', /json/)
+  .expect(200)
+  .end(function(err, res) {
+    if (err) throw err
+    makeCallStub.called.should.be.true
+    makeCallStub.lastCall.args[0].should.equal(fixture.phones.forward_phone.number)
+    makeCallStub.lastCall.args[1].should.equal(fixture.phones.forward_phone.settings.forward_number)
+    done()
+  })</code></pre></section><section><h2>Testing</h2><div>tests/controller/user.test.js (2/2)</div><pre><code class="javascript">it('should mark the user as confirmed', function(done) {
+  request(app)
+    .get(url)
+    .expect(200, function(err, res) {
+      db.users.findById(fixture.users.test._id, gotUser)
+    })
+ 
+  function gotUser(err, user) {
+    user.is_confirmed.should.equal(true)
+    done()
+  }
+})</code></pre></section><section><h2>Testing</h2><div>kue test (1/3)</div><pre><code class="javascript">var app, logger, db, type = 'worker-name'
+ 
+exports.name = type
+ 
+exports.bootstrap = function bootstrap(_app) {
+  app    = _app
+  logger = app.settings.logger
+  db     = app.settings.db
+ 
+  logger.info('Starting worker', {env: process.env.NODE_ENV, type: type})
+}
+ 
+exports.processJob = function processJob(job, done) {
+  logger.info('Starting job', {job: job.id, type: type})
+}</code></pre></section><section><h2>Testing</h2><div>kue test (2/3)</div><pre><code class="javascript">var app = require('../config/app')()
+  , workerModule = require('./worker1')
+ 
+// Bootstrap the child workers
+workerModule.bootstrap(app)
+ 
+logger.info('Starting parent worker',
+            { mode: process.env.NODE_ENV, type: type})
+ 
+// Get all the workers setup here
+queue.process(workerModule.name, 2, workerModule.processJob)
+ 
+// Get the interval for promoting delayed jobs to start
+queue.promote()</code></pre></section><section><h2>Testing</h2><div>kue test (3/3)</div><pre><code class="javascript">var worker = require('../../workers/worker1')
+worker.bootstrap(app)
+ 
+// Create fake job object
+var job = { id: 'test-id' }
+ 
+beforeEach(function(done) {
+  fixtures.clearAllAndLoad('./fixtures.js', done)
+})
+ 
+it('should call logger.error', function(done) {
+  worker.processJob(j, function(err) {
+    loggerSpy.called.should.be.true
+    loggerSpy.lastCall.args[0].should.equal('error')
+    done()
+  })
+})</code></pre></section><section><h2>Best Practices</h2><ul><li class="fragment">やらないといけないことに集中</li><li class="fragment">Analyticの作戦と実施</li><li class="fragment">メール送信はkueのワーカーで</li><li class="fragment">長いタスクはkueのワーカーで</li><li class="fragment">コードの最適化は最後の最後</li></ul></section><section><h2>Best Practices</h2><div>最適化が OK</div><ul><li>デバッグ出来るためのロギング</li><li>O(n^2)アルゴリズムの最適化</li><li>コードの読み方改善 (ある程度)</li></ul></section><section><h2>Best Practices</h2><div>最適化が NG</div><ul><li>O(n*log n)アルゴリズム</li><li>将来なために汎用的なコード</li></ul><div><br></div><div>目標を達成するためなの？</div></section><section><h2>Best Practices</h2><ul><li>急いでるが、奇麗なコードを</li></ul></section><section><h2>Best Practices</h2><div>奇麗なコード (個人差あり)</div><pre><code class="javascript">controller.show = function (req, res, next) {
+  var todos
+ 
+  db.todos.find({user_id: req.user._id}, gotTodos)
+ 
+  function gotTodos(err, _todos) {
+    if (err) return next(err)
+    todos = _todos
+ 
+    // 非同期関数呼び出す
+    asyncFunc(gotMoreData)
+  }
+ 
+  function gotMoreData(err, data) {
+    if (err) return next(err)
+    res.send({todos: todos, data: data})
+  }
+}</code></pre></section><section><h2>Best Practices</h2><ul><li>npm shrinkwrap で安心</li></ul></section><section><h2>Best Practices</h2><div>modelにappオブジェクトを渡す</div><div><br></div><div>config/config.js</div><pre><code class="javascript">app.settings.db.users.bootstrap(app)</code></pre><div>app/models/user.js</div><pre><code class="javascript">var app
+ 
+var User = module.exports = new Schema({
+  // ...
+})
+ 
+User.statics.bootstrap = function(_app) {
+  app = _app
+}</code></pre></section><section><h2>Best Practices</h2><div>uncaughtExceptionの処理</div><div><br></div><div>lib/exception.js</div><pre><code class="javascript">var nodemailer = require('nodemailer')
+process.on('uncaughtException', function(err) {
+  var msg = ''
+  if (err.message) msg += err.message + '\n'
+  if (err.stack)   msg += 'Stack Trace:\n' + err.stack
+ 
+  console.log(msg)
+ 
+  if (process.env.NODE_ENV != 'production') return process.exit(1)
+ 
+  // mailer作成
+ 
+  mailer.sendMail(options, function(err, response) {
+    // メールが送信したら、プロセス終了
+    process.exit(1)
+  })
+})</code></pre></section><section><h2>And Beyond</h2><div><br></div><ul><li class="fragment">アップタイムの改善</li><li class="fragment">heroku ps:scale web=2</li><li class="fragment">監視の強化</li><li class="fragment">チームのスケーラビリティ</li><li class="fragment">コーディング・スタイル</li></ul></section><section><h3>ご清聴ありがとうございました</h3><div><br></div><p><img height="250" src="http://i.imgur.com/HhZW5.jpg"></p><div>Jon Keating</div><div>jonkeating@gmail.com</div><div><a href="https://www.twitter.com/emostar">@emostar</a></div></section></div></div><script src="assets/lib/js/head.min.js"></script><script src="assets/js/reveal.min.js"></script><script>// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+    controls: true,
+    progress: true,
+    history: true,
+    center: true,
+    
+    theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+    transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/none
+    
+    // Optional libraries used to extend on reveal.js
+    dependencies: [
+        { src: 'assets/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+        { src: 'assets/plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+        { src: 'assets/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+        { src: 'assets/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+        { src: 'assets/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+        { src: 'assets/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+        // { src: 'assets/plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+    ]
+});</script></body></html>
