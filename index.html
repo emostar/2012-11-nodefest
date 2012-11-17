@@ -37,8 +37,7 @@ app.all('*', function(req, res, next) {
   req.kvLog.ip = req.ip
   next()
 })</code></pre><div>config/middleware/access.js</div><pre><code class="javascript">// Log the user
-req.kvLog.user_id = req.user._id.toString()</code></pre><div>Log output</div><pre><code>TODO1
-TODO2</code></pre></section><section><h2>Production</h2><div>ログをメールで送信する</div><pre><code class="javascript">    new (winston.transports.Mail)({
+req.kvLog.user_id = req.user._id.toString()</code></pre><div>Log output</div><pre>info: date=2012-11-17T11:19:10.607Z, method=POST, url=/twilio/initiate, type=reqlog, ip=108.20.36.147, status=200, response_time=43</pre></section><section><h2>Production</h2><div>ログをメールで送信する</div><pre><code class="javascript">    new (winston.transports.Mail)({
         to       : 'user@example.com'
       , from     : 'winston@example.com'
       , host     : 'smtp.sendgrid.net'
